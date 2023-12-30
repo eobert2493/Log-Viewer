@@ -26,6 +26,10 @@ class InputScintilla(QsciScintilla):
 
         # Enable drag and drop
         self.setAcceptDrops(True)
+    
+    def focusOutEvent(self, event):
+        # Keep caret line visible when editor loses focus
+        self.setCaretLineVisible(True)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
@@ -65,11 +69,15 @@ class OutputScintilla(QsciScintilla):
         # Set margins font
         font = QFont('Courier New')
         self.setMarginsFont(font)
+    
+    def focusOutEvent(self, event):
+        # Keep caret line visible when editor loses focus
+        self.setCaretLineVisible(True)
 
 def shorten_and_sort_logs():
     log_lines = input.text().split('\n')
     for i in range(len(log_lines)):
-        match = re.search(r'.*\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\].*?\[(INFO|ERROR)\](.*)', log_lines[i])
+        match = re.search(r'.*\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\].*?\[(INFO|ERROR|DEBUG|WARNING)\](.*)', log_lines[i])
         if match:
             log_lines[i] = f'[{match.group(1)}] [{match.group(2)}]{match.group(3)}'
     log_lines.sort()
