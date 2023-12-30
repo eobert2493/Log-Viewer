@@ -66,20 +66,6 @@ class OutputScintilla(QsciScintilla):
         font = QFont('Courier New')
         self.setMarginsFont(font)
 
-class DragDropTextEdit(QTextEdit):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setAcceptDrops(True)
-
-    def dragEnterEvent(self, event: QDragEnterEvent):
-        if event.mimeData().hasText():
-            event.acceptProposedAction()
-
-    def dropEvent(self, event: QDropEvent):
-        file_path = event.mimeData().text().replace("file://", "")
-        with open(file_path, 'r') as file:
-            self.setText(file.read())
-
 def shorten_and_sort_logs():
     log_lines = input.text().split('\n')
     for i in range(len(log_lines)):
