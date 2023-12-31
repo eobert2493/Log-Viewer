@@ -36,6 +36,7 @@ To run the Log Viewer script, use the following command:
     python3 LogViewer.py
     ```
 
+
 To build the application as a reusable executable:
 
     ```bash
