@@ -32,14 +32,14 @@ This repository contains a Log Viewer application.
 
 To run the Log Viewer script, use the following command:
 
-    ```python
-    python3 LogViewer.py
-    ```
+```bash
+python3 LogViewer.py
+```
 
 
 To build the application as a reusable executable:
 
-    ```python
-    pyinstaller --onefile LogViewer.py
-    ```
+```python
+pyinstaller --onefile LogViewer.py
+```
 
