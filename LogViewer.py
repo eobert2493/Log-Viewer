@@ -2,10 +2,10 @@ import json
 import xml.dom.minidom
 from xml.parsers.expat import ExpatError
 import re
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QFileDialog, QSplitter
-from PyQt5.QtGui import QTextOption, QDragEnterEvent, QDropEvent, QFont, QTextCursor, QColor, QDragMoveEvent
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QSplitter, QSlider
+from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QFont, QColor, QDragMoveEvent
 from PyQt5.QtCore import Qt
-from PyQt5.Qsci import QsciScintilla, QsciLexerPython, QsciLexerJSON, QsciLexerXML
+from PyQt5.Qsci import QsciScintilla, QsciLexerJSON, QsciLexerXML
 
 class InputScintilla(QsciScintilla):
     def __init__(self, parent=None):
@@ -130,6 +130,11 @@ def import_text():
     if file_name:
         with open(file_name, 'r') as file:
             input.setText(file.read())
+            
+def zoomChanged(value):
+    # Set the zoom level of the input and output widgets
+    input.zoomTo(value)
+    output.zoomTo(value)
 
 app = QApplication([])
 
@@ -148,6 +153,13 @@ shorten_and_sort_button = QPushButton("Shorten and Sort", main_window)
 shorten_and_sort_button.clicked.connect(shorten_and_sort_logs)
 shorten_and_sort_button.setMaximumWidth(shorten_and_sort_button.sizeHint().width())
 button_layout.addWidget(shorten_and_sort_button)
+
+# Create a QSlider
+zoom_slider = QSlider(Qt.Horizontal, main_window)
+zoom_slider.setRange(-10, 10)
+zoom_slider.setValue(0)
+zoom_slider.valueChanged.connect(zoomChanged)
+button_layout.addWidget(zoom_slider)
 
 button_layout.addStretch(1)
 
