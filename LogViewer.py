@@ -2,7 +2,8 @@ import json
 import xml.dom.minidom
 from xml.parsers.expat import ExpatError
 import re
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QSplitter, QSlider
+import os
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QSplitter, QSlider, QComboBox
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QFont, QColor, QDragMoveEvent
 from PyQt5.QtCore import Qt
 from PyQt5.Qsci import QsciScintilla, QsciLexerJSON, QsciLexerXML
@@ -66,9 +67,17 @@ class OutputScintilla(QsciScintilla):
         # Enable code folding
         self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
         
+        self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        
         # Set margins font
         font = QFont('Courier New')
         self.setMarginsFont(font)
+        
+        self.setReadOnly(True)
+        self.setFocusPolicy(Qt.NoFocus)
+        
+    def focusInEvent(self, event):
+       pass
     
     def focusOutEvent(self, event):
         # Keep caret line visible when editor loses focus
@@ -82,6 +91,7 @@ def shorten_and_sort_logs():
             log_lines[i] = f'[{match.group(1)}] [{match.group(2)}]{match.group(3)}'
     log_lines.sort()
     input.setText('\n'.join(log_lines))
+    input.setCursorPosition(0, 0)
 
 def pretty_print_line():
     json_lexer = QsciLexerJSON()
@@ -125,6 +135,10 @@ def pretty_print_line():
     # If no JSON or XML was found, clear the output
     output.clear()
 
+def import_text_dropdown(file_path):
+    with open(file_path, 'r') as file:
+        input.setText(file.read())
+
 def import_text():
     file_name, _ = QFileDialog.getOpenFileName(main_window, "Open Text File", "", "Text Files (*.txt)")
     if file_name:
@@ -135,11 +149,26 @@ def zoomChanged(value):
     # Set the zoom level of the input and output widgets
     input.zoomTo(value)
     output.zoomTo(value)
-
+    
 app = QApplication([])
 
 main_window = QWidget()
 main_window.showMaximized()
+
+# Get the list of files in the downloads directory
+downloads_dir = os.path.expanduser('~/Downloads')
+files = os.listdir(downloads_dir)
+
+# Create a QComboBox
+file_combo_box = QComboBox(main_window)
+
+# Add the files to the QComboBox
+for file in files:
+    file_combo_box.addItem(file)
+
+# Connect the currentIndexChanged signal to a method that imports the selected file
+file_combo_box.currentIndexChanged.connect(lambda: import_text_dropdown(os.path.join(downloads_dir, file_combo_box.currentText())))
+
 
 button_layout = QHBoxLayout()
 button_layout.setAlignment(Qt.AlignLeft)
@@ -160,6 +189,7 @@ zoom_slider.setRange(-10, 10)
 zoom_slider.setValue(0)
 zoom_slider.valueChanged.connect(zoomChanged)
 button_layout.addWidget(zoom_slider)
+button_layout.addWidget(file_combo_box)
 
 button_layout.addStretch(1)
 
