@@ -3,6 +3,7 @@ import xml.dom.minidom
 from xml.parsers.expat import ExpatError
 import re
 import os
+import pandas as pd
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QSplitter, QSlider, QComboBox
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QFont, QColor, QDragMoveEvent
 from PyQt5.QtCore import Qt
@@ -136,8 +137,24 @@ def pretty_print_line():
     output.clear()
 
 def import_text_dropdown(file_path):
-    with open(file_path, 'r') as file:
-        input.setText(file.read())
+    # Check if the file is a CSV file
+    if file_path.endswith('.csv'):
+        # Read the CSV file
+        df = pd.read_csv(file_path)
+
+        # Check if the 'Message' column exists
+        if 'Message' in df.columns:
+            # Get the 'message' column
+            messages = df['Message']
+
+            # Convert the 'message' column to a string and set the text of the input widget
+            input.setText('\n'.join(messages.astype(str)))
+        else:
+            print("The 'Message' column does not exist in the CSV file.")
+    else:
+        # If the file is not a CSV file, read it as a text file
+        with open(file_path, 'r') as file:
+            input.setText(file.read())
 
 def import_text():
     file_name, _ = QFileDialog.getOpenFileName(main_window, "Open Text File", "", "Text Files (*.txt)")
