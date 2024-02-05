@@ -36,10 +36,14 @@ To run the Log Viewer script, use the following command:
 python3 LogViewer.py
 ```
 
+```cmd
+py LogViewer.py
+```
+
 
 To build the application as a reusable executable:
 
 ```python
-pyinstaller --onefile LogViewer.py
+pyinstaller --onefile --noconsole LogViewer.py   
 ```
 
