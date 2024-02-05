@@ -12,30 +12,23 @@ class InputScintilla(QsciScintilla):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # Set the default paper (background) color to white and the default text color to black
         self.SendScintilla(QsciScintilla.SCI_STYLESETBACK, QsciScintilla.STYLE_DEFAULT, QColor("#ffffff"))
         self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, QsciScintilla.STYLE_DEFAULT, QColor("#000000"))
-        self.SendScintilla(QsciScintilla.SCI_STYLECLEARALL)  # Apply the above settings to all styles
+        self.SendScintilla(QsciScintilla.SCI_STYLECLEARALL) 
         
-        # Enable line highlighting
         self.setCaretLineVisible(True)     
         self.setCaretLineBackgroundColor(QColor("#E8E8E8"))
 
-        # Enable line numbers
         self.setMarginType(0, QsciScintilla.NumberMargin)
         self.setMarginWidth(0, "000")
         self.setMarginLineNumbers(0, True)
-        
-        # Set margins font
         font = QFont('Courier New')
         font.setPointSize(16)
         self.setMarginsFont(font)
 
-        # Enable drag and drop
         self.setAcceptDrops(True)
     
     def focusOutEvent(self, event):
-        # Keep caret line visible when editor loses focus
         self.setCaretLineVisible(True)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
@@ -48,30 +41,25 @@ class InputScintilla(QsciScintilla):
 
     def dropEvent(self, event: QDropEvent):
         if event.mimeData().hasUrls():
-            # Handle file drop
             url = event.mimeData().urls()[0]
             file_path = url.toLocalFile()
             self.import_text(file_path)
 
     def import_text(self, file_path):
         try:
-            # Try to read the file as a text file
             with open(file_path, 'r') as file:
                 self.setText(file.read())
         except UnicodeDecodeError:
-            # If a UnicodeDecodeError is raised, show a message box
             QMessageBox.critical(None, "Error", "Only text files are allowed.")
 
 class OutputScintilla(QsciScintilla):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # Set the default paper (background) color to white and the default text color to black
         self.SendScintilla(QsciScintilla.SCI_STYLESETBACK, QsciScintilla.STYLE_DEFAULT, QColor("#ffffff"))
         self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, QsciScintilla.STYLE_DEFAULT, QColor("#000000"))
         self.SendScintilla(QsciScintilla.SCI_STYLECLEARALL)  # Apply the above settings to all styles
 
-        # Enable line highlighting
         self.setCaretLineVisible(True)
         self.setCaretLineBackgroundColor(QColor("#E8E8E8"))
         
