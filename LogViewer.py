@@ -20,10 +20,10 @@ class InputScintilla(QsciScintilla):
         self.setCaretLineBackgroundColor(QColor("#E8E8E8"))
 
         self.setMarginType(0, QsciScintilla.NumberMargin)
-        self.setMarginWidth(0, "000")
+        self.setMarginWidth(0, "000000")
         self.setMarginLineNumbers(0, True)
         font = QFont('Courier New')
-        font.setPointSize(16)
+        font.setPointSize(12)
         self.setMarginsFont(font)
 
         self.setAcceptDrops(True)
@@ -65,8 +65,11 @@ class OutputScintilla(QsciScintilla):
         
         # Enable line numbers
         self.setMarginType(0, QsciScintilla.NumberMargin)
-        self.setMarginWidth(0, "000")
+        self.setMarginWidth(0, "000000")
         self.setMarginLineNumbers(0, True)
+        font = QFont('Courier New')
+        font.setPointSize(12)
+        self.setMarginsFont(font)
         
         # Enable code folding
         self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
@@ -145,13 +148,19 @@ def pretty_print_line():
     output.clear()
 
 def import_text_dropdown(file_path):
-    try:
-        # Try to read the file as a text file
-        with open(file_path, 'r') as file:
-            input.setText(file.read())
-    except UnicodeDecodeError:
-        # If a UnicodeDecodeError is raised, show a notification to the user
-        QMessageBox.critical(None, "Error", "Only text files are allowed.")
+    if file_path != downloads_dir:  # Check if a file is selected
+        if os.path.isfile(file_path):
+            try:
+                # Try to read the file as a text file
+                with open(file_path, 'r') as file:
+                    input.setText(file.read())
+            except UnicodeDecodeError:
+                # If a UnicodeDecodeError is raised, show a notification to the user
+                QMessageBox.critical(None, "Error", "Only text files are allowed.")
+        else:
+            print(f"File not found: {file_path}")
+    else:
+        print("No file selected")
 
 # For import button
 def import_text():
@@ -200,10 +209,15 @@ app.setStyleSheet("""
 
 main_window = QWidget()
 main_window.showMaximized()
+main_window.setWindowTitle("Log Viewer")
+main_window.setWindowState(Qt.WindowMaximized)
 
 # Get the list of files in the downloads directory
 downloads_dir = os.path.expanduser('~/Downloads')
-files = os.listdir(downloads_dir)
+items = os.listdir(downloads_dir)
+
+# Filter out directories, leaving only files
+files = [item for item in items if os.path.isfile(os.path.join(downloads_dir, item))]
 
 # Get the modification times of the files
 mod_times = [os.path.getmtime(os.path.join(downloads_dir, file)) for file in files]
@@ -215,7 +229,6 @@ files = [file for _, file in sorted(zip(mod_times, files), reverse=True)]
 file_combo_box = QComboBox(main_window)
 file_combo_box.setMaximumHeight(40)
 
-
 # Add the files to the QComboBox
 max_files = 20
 for file in files[:max_files]:
@@ -224,6 +237,23 @@ for file in files[:max_files]:
 # Connect the currentIndexChanged signal to a method that imports the selected file
 file_combo_box.currentIndexChanged.connect(lambda: import_text_dropdown(os.path.join(downloads_dir, file_combo_box.currentText())))
 
+def refresh_files():
+    # Get the list of files in the downloads directory
+    downloads_dir = os.path.expanduser('~/Downloads')
+    items = os.listdir(downloads_dir)
+
+    # Filter out directories, leaving only files
+    files = [item for item in items if os.path.isfile(os.path.join(downloads_dir, item))]
+
+    # Get the modification times of the files
+    mod_times = [os.path.getmtime(os.path.join(downloads_dir, file)) for file in files]
+
+    # Sort the files by their modification times in descending order
+    files = [file for _, file in sorted(zip(mod_times, files), reverse=True)]
+
+    # Clear the combo box and add the new list of files
+    file_combo_box.clear()
+    file_combo_box.addItems(files)
 
 button_layout = QHBoxLayout()
 button_layout.setAlignment(Qt.AlignLeft)
@@ -239,6 +269,10 @@ shorten_and_sort_button.setMaximumWidth(shorten_and_sort_button.sizeHint().width
 button_layout.addWidget(shorten_and_sort_button)
 
 button_layout.addWidget(file_combo_box)
+refresh_downloads_button = QPushButton("Refresh", main_window)
+refresh_downloads_button.clicked.connect(refresh_files)
+refresh_downloads_button.setMaximumWidth(refresh_downloads_button.sizeHint().width())
+button_layout.addWidget(refresh_downloads_button)
 
 # Create a QPushButton for zooming out
 zoom_out_button = QPushButton("-", main_window)
